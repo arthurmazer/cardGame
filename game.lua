@@ -14,6 +14,7 @@ local tempoTransicao = 1
 
 local timer = 0  -- Variável para controle de tempo
 local animacoes = {}
+local cartaJogada = nil
 
 local gameMusicBackground
 
@@ -57,7 +58,7 @@ local botoes = {
         width = 150, height = 40,
         habilitado = false, 
         acao = function()
-            print("Carta jogada!") 
+            Game.jogarCarta()
         end
     }
 
@@ -71,6 +72,46 @@ function Game.testeTouchCard()
     pickCardSom:play()
     print("clicado touch card")
 end
+
+function Game.jogarCarta()
+    for _, carta in ipairs(players[4].cartas) do
+        if carta.selecionada then
+            carta.selecionada = false
+
+                -- Remove carta da mão
+            for i, c in ipairs(players[4].cartas) do
+                if c == carta then
+                    table.remove(players[4].cartas, i)
+                    break
+                end
+            end
+
+                -- Animação para a direita do deck
+            local destinoX = deckSprite.x + deckSprite.width + 40
+            local destinoY = deckSprite.y
+
+            table.insert(animacoes, {
+                    carta = carta,
+                    startX = carta.x,
+                    startY = carta.y,
+                    destinoX = destinoX,
+                    destinoY = destinoY,
+                    tempo = 0,
+                    duracao = 0.5,
+                    finalizar = function()
+                        cartaJogada = {
+                            carta = carta,
+                            jogador = players[4].nome or "Você",
+                            x = destinoX,
+                            y = destinoY
+                        }
+                    end
+                })
+                break
+            end
+        end
+end
+
 
 function Game.iniciarAnimacaoRecolher()
     for _, player in ipairs(players) do
@@ -374,7 +415,9 @@ function Game.update(dt)
                     anim.carta.virada = true 
                 end
                 virarSom:play()
+                if anim.finalizar then anim.finalizar() end
                 table.remove(animacoes, i)
+
             end
         end
     end
@@ -535,6 +578,28 @@ function Game.draw()
         love.graphics.rectangle("fill", deckSprite.x, deckSprite.y, deckSprite.width, deckSprite.height)
         love.graphics.setColor(1, 1, 1)
     end
+
+    -- Desenha Carta Jogada
+    if cartaJogada then
+        local img = cartaJogada.carta.virada and Baralho.getImage(cartaJogada.carta.nome) or Baralho.getImage("Costas")
+        if img then
+            love.graphics.draw(img, cartaJogada.x, cartaJogada.y)
+
+            -- Nome do jogador abaixo
+            local nome = cartaJogada.jogador
+            local font = love.graphics.getFont()
+            local textWidth = font:getWidth(nome)
+            local textHeight = font:getHeight()
+
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.print(
+                nome,
+                cartaJogada.x + (cartaW - textWidth) / 2,
+                cartaJogada.y + cartaH + 5
+            )
+        end
+    end
+
 
     -- Botões
         for _, btn in ipairs(botoes) do
