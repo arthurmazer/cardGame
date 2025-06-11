@@ -140,12 +140,14 @@ function Game.load()
         local cartas = {}
         for j = 1, 2 do
             local nome = table.remove(deck)
+            local nomeCompleto = Baralho.getCardName(nome)
             local virada = i == 4 -- jogador 4 (você) vê as cartas
             table.insert(cartas, {
                 nome = nome,
                 virada = virada,
                 anim = -100 * j,
-                selecionada = false
+                selecionada = false,
+                nomeCompleto = nomeCompleto
             })
         end
 
@@ -287,6 +289,7 @@ function Game.distribuirCartasParaTodos()
         player.cartas = {}
         for j = 1, 2 do
             local cartaNome = table.remove(deck)
+            local nomeCompleto = Baralho.getCardName(cartaNome)
             local souEu = (i == #players)
 
             if Game.soundPool then
@@ -309,8 +312,8 @@ function Game.distribuirCartasParaTodos()
                 virada = false,
                 x = deckSprite.x + deckSprite.width/2 - cartaW/2,
                 y = deckSprite.y + deckSprite.height/2 - cartaH/2,
-                dono = i
-                -- Removido o .som da carta pois não é mais necessário
+                dono = i,
+                nomeCompleto = nomeCompleto
             }
             
             table.insert(player.cartas, novaCarta)
@@ -400,7 +403,7 @@ function Game.update(dt)
         if btn.texto:sub(1, 5) == "Jogar" then
             if cartaSelecionada then
                 btn.habilitado = true
-                btn.texto = "Jogar " .. cartaSelecionada.nome
+                btn.texto = "Jogar " .. cartaSelecionada.nomeCompleto
             else
                 btn.habilitado = false
                 btn.texto = "Jogar"

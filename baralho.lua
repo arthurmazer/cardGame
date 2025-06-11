@@ -37,6 +37,100 @@ function Baralho.getImage(nome)
     return imagens[nome]
 end
 
+function Baralho.getCardName(nome)
+    if nome == "a-c" then
+        return "Ás de Copas"
+    elseif nome == "a-o" then
+        return "Ás de Ouro"
+    elseif nome == "a-e" then
+        return "Ás de Espada"
+    elseif nome == "a-p" then
+        return "Ás de Paus"
+
+    elseif nome == "2-c" then
+        return "2 de Copas"
+    elseif nome == "2-o" then
+        return "2 de Ouro"
+    elseif nome == "2-e" then
+        return "2 de Espada"
+    elseif nome == "2-p" then
+        return "2 de Paus"
+
+    elseif nome == "3-c" then
+        return "3 de Copas"
+    elseif nome == "3-o" then
+        return "3 de Ouro"
+    elseif nome == "3-e" then
+        return "3 de Espada"
+    elseif nome == "3-p" then
+        return "3 de Paus"
+
+    elseif nome == "4-c" then
+        return "4 de Copas"
+    elseif nome == "4-o" then
+        return "4 de Ouro"
+    elseif nome == "4-e" then
+        return "4 de Espada"
+    elseif nome == "4-p" then
+        return "4 de Paus"
+
+    elseif nome == "5-c" then
+        return "5 de Copas"
+    elseif nome == "5-o" then
+        return "5 de Ouro"
+    elseif nome == "5-e" then
+        return "5 de Espada"
+    elseif nome == "5-p" then
+        return "5 de Paus"
+
+    elseif nome == "6-c" then
+        return "6 de Copas"
+    elseif nome == "6-o" then
+        return "6 de Ouro"
+    elseif nome == "6-e" then
+        return "6 de Espada"
+    elseif nome == "6-p" then
+        return "6 de Paus"
+
+    elseif nome == "7-c" then
+        return "7 de Copas"
+    elseif nome == "7-o" then
+        return "7 de Ouro"
+    elseif nome == "7-e" then
+        return "7 de Espada"
+    elseif nome == "7-p" then
+        return "7 de Paus"
+
+    elseif nome == "q-c" then
+        return "Dama de Copas"
+    elseif nome == "q-o" then
+        return "Dama de Ouro"
+    elseif nome == "q-e" then
+        return "Dama de Espada"
+    elseif nome == "q-p" then
+        return "Dama de Paus"
+    
+    elseif nome == "j-c" then
+        return "Valete de Copas"
+    elseif nome == "j-o" then
+        return "Valete de Ouro"
+    elseif nome == "j-e" then
+        return "Valete de Espada"
+    elseif nome == "j-p" then
+        return "Valete de Paus"
+
+    elseif nome == "k-c" then
+        return "Rei de Copas"
+    elseif nome == "k-o" then
+        return "Rei de Ouro"
+    elseif nome == "k-e" then
+        return "Rei de Espada"
+    elseif nome == "k-p" then
+        return "Rei de Paus"
+    end
+
+end
+
 -- Retorna um deck embaralhado
 function Baralho.getDeck()
     local deck = {}
