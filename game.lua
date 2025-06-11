@@ -14,7 +14,8 @@ local tempoTransicao = 1
 
 local timer = 0  -- Variável para controle de tempo
 local animacoes = {}
-local cartaJogada = nil
+local cartasJogadas = {}
+
 
 local gameMusicBackground
 
@@ -78,7 +79,7 @@ function Game.jogarCarta()
         if carta.selecionada then
             carta.selecionada = false
 
-                -- Remove carta da mão
+            -- Remove carta da mão
             for i, c in ipairs(players[4].cartas) do
                 if c == carta then
                     table.remove(players[4].cartas, i)
@@ -86,30 +87,30 @@ function Game.jogarCarta()
                 end
             end
 
-                -- Animação para a direita do deck
+            local index = #cartasJogadas + 1
             local destinoX = deckSprite.x + deckSprite.width + 40
-            local destinoY = deckSprite.y
+            local destinoY = deckSprite.y + (index - 1) * (cartaH + 10) -- espaçamento entre jogadas
 
             table.insert(animacoes, {
-                    carta = carta,
-                    startX = carta.x,
-                    startY = carta.y,
-                    destinoX = destinoX,
-                    destinoY = destinoY,
-                    tempo = 0,
-                    duracao = 0.5,
-                    finalizar = function()
-                        cartaJogada = {
-                            carta = carta,
-                            jogador = players[4].nome or "Você",
-                            x = destinoX,
-                            y = destinoY
-                        }
-                    end
-                })
-                break
-            end
+                carta = carta,
+                startX = carta.x,
+                startY = carta.y,
+                destinoX = destinoX,
+                destinoY = destinoY,
+                tempo = 0,
+                duracao = 0.5,
+                finalizar = function()
+                    table.insert(cartasJogadas, {
+                        carta = carta,
+                        jogador = players[4].nome or "Você",
+                        x = destinoX,
+                        y = destinoY
+                    })
+                end
+            })
+            break
         end
+    end
 end
 
 
@@ -580,25 +581,24 @@ function Game.draw()
     end
 
     -- Desenha Carta Jogada
-    if cartaJogada then
-        local img = cartaJogada.carta.virada and Baralho.getImage(cartaJogada.carta.nome) or Baralho.getImage("Costas")
+    for _, jogada in ipairs(cartasJogadas) do
+        local img = jogada.carta.virada and Baralho.getImage(jogada.carta.nome) or Baralho.getImage("Costas")
         if img then
-            love.graphics.draw(img, cartaJogada.x, cartaJogada.y)
+            love.graphics.draw(img, jogada.x, jogada.y)
 
-            -- Nome do jogador abaixo
-            local nome = cartaJogada.jogador
+            -- Nome do jogador abaixo da carta
+            local nome = jogada.jogador
             local font = love.graphics.getFont()
             local textWidth = font:getWidth(nome)
-            local textHeight = font:getHeight()
-
             love.graphics.setColor(1, 1, 1)
             love.graphics.print(
                 nome,
-                cartaJogada.x + (cartaW - textWidth) / 2,
-                cartaJogada.y + cartaH + 5
+                jogada.x + (cartaW - textWidth) / 2,
+                jogada.y + cartaH + 5
             )
         end
     end
+
 
 
     -- Botões
