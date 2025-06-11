@@ -15,6 +15,7 @@ local tempoTransicao = 1
 local timer = 0  -- Variável para controle de tempo
 local animacoes = {}
 local cartasJogadas = {}
+local cartaVira = nil
 
 
 local gameMusicBackground
@@ -196,7 +197,23 @@ function Game.iniciarAnimacaoRecolher()
         })
     end
 
-    -- Limpa histórico de jogadas (inclusive nomes)
+    -- Recolhe o vira e as cartas jogadas
+    if cartaVira then
+        table.insert(animacoes, {
+            carta = cartaVira,
+            startX = cartaVira.x,
+            startY = cartaVira.y,
+            destinoX = deckSprite.x + deckSprite.width/2 - cartaW/2,
+            destinoY = deckSprite.y + deckSprite.height/2 - cartaH/2,
+            tempo = 0,
+            duracao = 0.8,
+            recolhendo = true,
+            scaleStart = 1.0,
+            scaleEnd = 0.5
+        })
+        cartaVira = nil
+    end
+
     cartasJogadas = {}
 end
 
@@ -397,21 +414,6 @@ function Game.distribuirCartasParaTodos()
             local cartaNome = table.remove(deck)
             local nomeCompleto = Baralho.getCardName(cartaNome)
             local souEu = (i == #players)
-
-            if Game.soundPool then
-                -- print("ERRO CRÍTICO: Game.soundPool não existe!")
-                -- return
-            end
-            
-            -- if Game.soundPool and Game.soundPool[poolIndex] then
-            --    Game.soundPool[poolIndex]:stop()
-            --    Game.soundPool[poolIndex]:play()
-           --     poolIndex = poolIndex + 1  -- Avança para o próximo som
-            --else
-            --    print("Aviso: Sound pool esgotado ou não inicializado")
-            --end 
-
-            
             
             local novaCarta = {
                 nome = cartaNome,
@@ -437,6 +439,19 @@ function Game.distribuirCartasParaTodos()
                 virarSeForHumano = souEu
             })
         end
+    end
+
+    -- COLOCA O VIRA NA MESA
+    -- Adiciona a carta "VIRA" (a próxima do deck)
+    local cartaNome = table.remove(deck)
+
+    if cartaNome then
+        cartaVira = {
+            nome = cartaNome,
+            virada = true,
+            x = deckSprite.x - cartaW - 40,
+            y = deckSprite.y,
+        }
     end
 end
 
@@ -672,6 +687,26 @@ function Game.draw()
             )
         end
     end
+
+    -- Carta Vira
+    if cartaVira then
+        local img = Baralho.getImage(cartaVira.nome)
+        if img then
+            love.graphics.draw(img, cartaVira.x, cartaVira.y)
+
+            -- Escreve "VIRA" abaixo da carta
+            local label = "VIRA"
+            local font = love.graphics.getFont()
+            local textWidth = font:getWidth(label)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.print(
+                label,
+                cartaVira.x + (cartaW - textWidth) / 2,
+                cartaVira.y + cartaH + 5
+            )
+        end
+    end
+
 
 
 
