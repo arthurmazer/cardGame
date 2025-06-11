@@ -30,6 +30,15 @@ local deckSprite = {
     height = 64 
 }
 
+local turnoAtual = 1 -- 1 a 4
+local jogadoresIA = {
+    [1] = true,
+    [2] = true,
+    [3] = true,
+    [4] = false -- Player
+}
+
+
 local playerAvatars = {}
 
 
@@ -60,6 +69,7 @@ local botoes = {
         habilitado = false, 
         acao = function()
             Game.jogarCarta()
+            Game.proximoTurno()
         end
     }
 
@@ -113,26 +123,83 @@ function Game.jogarCarta()
     end
 end
 
+function Game.jogadaIA(jogadorIndex)
+    local player = players[jogadorIndex]
+    if #player.cartas == 0 then return end
+
+    -- Espera uma animação terminar antes de jogar (1 por vez)
+    if #animacoes > 0 then return end
+
+    local carta = table.remove(player.cartas, 1)
+    carta.virada = true -- pode ajustar a lógica se precisar
+
+    local index = #cartasJogadas + 1
+    local destinoX = deckSprite.x + deckSprite.width + 40
+    local destinoY = deckSprite.y + (index - 1) * (cartaH + 10)
+
+    table.insert(animacoes, {
+        carta = carta,
+        startX = carta.x,
+        startY = carta.y,
+        destinoX = destinoX,
+        destinoY = destinoY,
+        tempo = 0,
+        duracao = 0.5,
+        finalizar = function()
+            table.insert(cartasJogadas, {
+                carta = carta,
+                jogador = players[jogadorIndex].nome or ("IA " .. jogadorIndex),
+                x = destinoX,
+                y = destinoY
+            })
+
+            Game.proximoTurno()
+        end
+    })
+end
+
+
 
 function Game.iniciarAnimacaoRecolher()
+    -- Recolher cartas da mão dos jogadores
     for _, player in ipairs(players) do
         for _, carta in ipairs(player.cartas) do
-            -- INSERÇÃO na tabela de animações (animação de volta)
             table.insert(animacoes, {
                 carta = carta,
-                startX = carta.x, -- Começa da posição atual
+                startX = carta.x,
                 startY = carta.y,
-                destinoX = deckSprite.x + deckSprite.width/2 - cartaW/2, -- Volta pro deck
+                destinoX = deckSprite.x + deckSprite.width/2 - cartaW/2,
                 destinoY = deckSprite.y + deckSprite.height/2 - cartaH/2,
                 tempo = 0,
                 duracao = 0.8,
-                recolhendo = true, -- Flag importante!
-                scaleStart = 1.0,  -- Efeito opcional de encolher
+                recolhendo = true,
+                scaleStart = 1.0,
                 scaleEnd = 0.5
             })
         end
     end
+
+    -- Recolher cartas jogadas
+    for _, jogada in ipairs(cartasJogadas) do
+        local carta = jogada.carta
+        table.insert(animacoes, {
+            carta = carta,
+            startX = carta.x,
+            startY = carta.y,
+            destinoX = deckSprite.x + deckSprite.width/2 - cartaW/2,
+            destinoY = deckSprite.y + deckSprite.height/2 - cartaH/2,
+            tempo = 0,
+            duracao = 0.8,
+            recolhendo = true,
+            scaleStart = 1.0,
+            scaleEnd = 0.5
+        })
+    end
+
+    -- Limpa histórico de jogadas (inclusive nomes)
+    cartasJogadas = {}
 end
+
 
 function Game.posicionarBotoes()
     local screenWidth, screenHeight = love.graphics.getDimensions()
@@ -313,13 +380,10 @@ end
 local virarIndex = 1
 function Game.playVirarSom()
     local som = Game.virarSomPool[virarIndex]
-    print("entro")
     if som:isPlaying() then
-        print("IS PLAYING")
         som:stop()
     end
     som:play()
-    print("PLAYO AGAIN")
     virarIndex = virarIndex % #Game.virarSomPool + 1
 end
 
@@ -376,10 +440,20 @@ function Game.distribuirCartasParaTodos()
     end
 end
 
+function Game.proximoTurno()
+    turnoAtual = turnoAtual % #players + 1
+end
+
 
 function Game.update(dt)
     timer = timer + dt
     local mx, my = love.mouse.getPosition()
+
+    -- Se for IA, joga automaticamente
+    if jogadoresIA[turnoAtual] then
+        Game.jogadaIA(turnoAtual)
+    end
+
 
     if estado == "animando" then
         transicaoAlpha = transicaoAlpha - dt / tempoTransicao
