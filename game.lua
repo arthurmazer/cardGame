@@ -50,8 +50,17 @@ local botoes = {
         acao = function() 
             Game.iniciarAnimacaoRecolher() 
         end
+    },
+    {
+        texto = "Jogar",
+        x = 0, y = 0,
+        width = 150, height = 40,
+        habilitado = false, 
+        acao = function()
+            print("Carta jogada!") 
+        end
     }
-    -- Adicione mais botões conforme necessário
+
 }
 
 function Game.testeDistribuir()
@@ -181,7 +190,9 @@ function Game.mousepressed(x, y, button)
         for _, btn in ipairs(botoes) do
             if x >= btn.x and x <= btn.x + btn.width and
                y >= btn.y and y <= btn.y + btn.height then
-                btn.acao()
+                if btn.habilitado ~= false then
+                    btn.acao()
+                end
                 return
             end
         end
@@ -374,6 +385,30 @@ function Game.update(dt)
             carta.hover = true
         end
     end
+    -- Verifica se alguma carta do jogador está selecionada
+    -- Verifica se alguma carta está selecionada
+    local cartaSelecionada = nil
+    for _, carta in ipairs(players[4].cartas) do
+        if carta.selecionada then
+            cartaSelecionada = carta
+            break
+        end
+    end
+
+    -- Atualiza estado e texto do botão "Jogar"
+    for _, btn in ipairs(botoes) do
+        if btn.texto:sub(1, 5) == "Jogar" then
+            if cartaSelecionada then
+                btn.habilitado = true
+                btn.texto = "Jogar " .. cartaSelecionada.nome
+            else
+                btn.habilitado = false
+                btn.texto = "Jogar"
+            end
+        end
+    end
+
+
 end
 
 function Game.draw()
@@ -499,11 +534,21 @@ function Game.draw()
     end
 
     -- Botões
-    for _, btn in ipairs(botoes) do
-        love.graphics.setColor(0.4, 0.6, 1)
+        for _, btn in ipairs(botoes) do
+            if btn.habilitado == false then
+                love.graphics.setColor(0.5, 0.5, 0.5) -- cinza desabilitado
+        else
+                love.graphics.setColor(0.4, 0.6, 1)   -- azul normal
+        end
+
         love.graphics.rectangle("fill", btn.x, btn.y, btn.width, btn.height, 5, 5)
 
-        love.graphics.setColor(0, 0, 0)
+        if btn.habilitado == false then
+            love.graphics.setColor(0.6, 0.6, 0.6)
+        else
+            love.graphics.setColor(0, 0, 0)
+        end
+
         local font = love.graphics.getFont()
         local textWidth = font:getWidth(btn.texto)
         local textHeight = font:getHeight()
